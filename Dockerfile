@@ -27,18 +27,25 @@ RUN cp $ANDROID_HOME/build-tools/30.0.3/lib/dx.jar $ANDROID_HOME/build-tools/33.
 ENV PATH ${ANDROID_NDK_HOME}:$PATH
 ENV PATH ${ANDROID_NDK_HOME}/prebuilt/linux-x86_64/bin/:$PATH
 
+# Add software needed to build the dependencies
+RUN apt update && apt install -y cmake ninja-build golang build-essential
+ENV NDK=$ANDROID_NDK_HOME
+ENV NINJA_PATH=/usr/bin/ninja
+
 CMD mkdir -p /home/source/TMessagesProj/build/outputs/apk && \
     mkdir -p /home/gradle/TMessagesProj/build/outputs/bundle && \
     mkdir -p /home/source/TMessagesProj/build/outputs/native-debug-symbols && \
     cp -R /home/source/. /home/gradle && \
     cd /home/gradle && \
+    cd TMessagesProj/jni && \
+    bash build_libvpx_clang.sh && \
+    bash patch_boringssl.sh && \
+    bash build_boringssl.sh && \
+    bash build_ffmpeg_clang.sh && \
+    bash patch_ffmpeg.sh && \
+    cd ../.. && \
     gradle :TMessagesProj_App:bundleBundleAfat_SDK23Release && \
     gradle :TMessagesProj_App:bundleBundleAfatRelease && \
-    gradle :TMessagesProj_AppStandalone:assembleAfatStandalone && \
     gradle :TMessagesProj_App:assembleAfatRelease && \
-    gradle :TMessagesProj_AppHuawei:assembleAfatRelease && \
     cp -R /home/gradle/TMessagesProj_App/build/outputs/apk/. /home/source/TMessagesProj/build/outputs/apk && \
-    cp -R /home/gradle/TMessagesProj_AppHuawei/build/outputs/apk/. /home/source/TMessagesProj/build/outputs/apk && \
-    cp -R /home/gradle/TMessagesProj_AppStandalone/build/outputs/apk/. /home/source/TMessagesProj/build/outputs/apk && \
-    cp -R /home/gradle/TMessagesProj_App/build/outputs/bundle/. /home/source/TMessagesProj/build/outputs/bundle && \
-    cp -R /home/gradle/TMessagesProj_App/build/outputs/native-debug-symbols/. /home/source/TMessagesProj/build/outputs/native-debug-symbols
+    cp -R /home/gradle/TMessagesProj_App/build/outputs/bundle/. /home/source/TMessagesProj/build/outputs/bundle

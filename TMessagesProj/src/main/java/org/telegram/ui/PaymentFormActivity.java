@@ -511,17 +511,6 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
     public void onResume() {
         super.onResume();
         AndroidUtilities.requestAdjustResize(getParentActivity(), classGuid);
-        if (Build.VERSION.SDK_INT >= 23) {
-            try {
-                if ((currentStep == STEP_PAYMENT_INFO || currentStep == STEP_SET_PASSWORD_EMAIL) && !paymentForm.invoice.test) {
-                    getParentActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-                } else if (SharedConfig.passcodeHash.length() == 0 || SharedConfig.allowScreenCapture) {
-                    getParentActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
-                }
-            } catch (Throwable e) {
-                FileLog.e(e);
-            }
-        }
     }
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
@@ -3188,13 +3177,6 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
             } catch (Exception e) {
                 FileLog.e(e);
             }
-        }
-        try {
-            if ((currentStep == STEP_PAYMENT_INFO || currentStep == STEP_SET_PASSWORD_EMAIL) && Build.VERSION.SDK_INT >= 23 && (SharedConfig.passcodeHash.length() == 0 || SharedConfig.allowScreenCapture)) {
-                getParentActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
-            }
-        } catch (Throwable e) {
-            FileLog.e(e);
         }
         super.onFragmentDestroy();
         canceled = true;

@@ -204,6 +204,15 @@ If you want to publish a modified version of Telegram:
 - Take good care of your users' data and privacy
 - **Please remember to publish your code too in order to comply with the licenses**
 
+### Building with Docker
+
+You can also use docker to build the apk.
+1. `git clone --recursive https://github.com/Telegram-FOSS-Team/Telegram-FOSS.git`
+1. Create `API_KEYS` like described above
+1. `docker build --tag telegram-foss .`
+1. `docker run --rm -v $PWD:/home/source -it telegram-foss`
+1. The apk will be located at `TMessagesProj/build/outputs/apk/afat/release/app.apk`
+
 # DIGITAL RESISTANCE
 
 ![DIGITALRESISTANCE](/DigitalResistance.jpg?raw=true "DIGITALRESISTANCE")

@@ -2866,48 +2866,6 @@ public class StoryViewer implements NotificationCenter.NotificationCenterDelegat
     }
 
     public void allowScreenshots(boolean allowScreenshots) {
-        if (BuildVars.DEBUG_PRIVATE_VERSION) {
-            return;
-        }
-        allowScreenshots = !isShowing || allowScreenshots;
-        if (this.allowScreenshots != allowScreenshots) {
-            this.allowScreenshots = allowScreenshots;
-
-            if (surfaceView != null) {
-                surfaceView.setSecure(!allowScreenshots);
-            }
-            if (liveView != null) {
-                liveView.setSecure(!allowScreenshots);
-            }
-            if (ATTACH_TO_FRAGMENT) {
-                if (fragment.getParentActivity() != null) {
-                    if (allowScreenshots) {
-                        fragment.getParentActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
-                        AndroidUtilities.logFlagSecure();
-                    } else {
-                        if (!SharedConfig.disableSecureFlags) {
-                            fragment.getParentActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
-                        }
-                        AndroidUtilities.logFlagSecure();
-                    }
-                }
-            } else {
-                if (allowScreenshots) {
-                    windowLayoutParams.flags &= ~WindowManager.LayoutParams.FLAG_SECURE;
-                    AndroidUtilities.logFlagSecure();
-                } else {
-                    if (!SharedConfig.disableSecureFlags) {
-                        windowLayoutParams.flags |= WindowManager.LayoutParams.FLAG_SECURE;
-                    }
-                    AndroidUtilities.logFlagSecure();
-                }
-                try {
-                    windowManager.updateViewLayout(windowView, windowLayoutParams);
-                } catch (Exception e) {
-                    FileLog.e(e);
-                }
-            }
-        }
     }
 
     public void openFor(BaseFragment fragment, RecyclerListView recyclerListView, ChatActionCell cell) {

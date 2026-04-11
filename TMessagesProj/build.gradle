@@ -131,8 +131,9 @@ android {
 
         multiDexEnabled true
 
-        // Limit CMake to a single ABI for per-ABI F-Droid builds; has no effect otherwise.
-        if (singleFdAbi) ndk.abiFilters singleFdAbi
+        // Limit CMake to the target ABI. For per-ABI F-Droid builds, detectSingleFdAbi()
+        // returns the requested ABI; otherwise default to arm64-v8a only.
+        ndk.abiFilters singleFdAbi ?: 'arm64-v8a'
 
         externalNativeBuild {
             cmake {
@@ -298,32 +299,6 @@ task buildNativeLibs(description: 'Build native libraries for all ABIs.') {
               'buildNativeLibsX86_64', 'buildNativeLibsX86'
 }
 
-// Wire each CMake/JniLibFolders task to the matching per-ABI native build task.
-// CMake task names include the ABI in brackets, e.g. configureCMakeRelease[arm64-v8a].
-// merge*JniLibFolders tasks use mustRunAfter (not dependsOn) for each per-ABI task:
-// jniLibs.srcDirs points to jni/ but contributes no .so files (no ABI-named subdirs
-// exist there); the ordering only prevents a race where a concurrent native build
-// creates/deletes intermediate files (.d, .o) while the merge task walks the tree.
-// mustRunAfter is sufficient — native builds are scheduled by CMake task dependencies.
-afterEvaluate {
-    def abiToTask = [
-        'arm64-v8a'   : 'buildNativeLibsArm64',
-        'armeabi-v7a' : 'buildNativeLibsArm32',
-        'x86_64'      : 'buildNativeLibsX86_64',
-        'x86'         : 'buildNativeLibsX86',
-    ]
-    def fallbackTask = singleFdAbi ? abiToTask[singleFdAbi] : 'buildNativeLibs'
-    tasks.matching {
-        it.name.matches('configureCMake.*') ||
-            it.name.matches('buildCMake.*') ||
-            it.name.matches('externalNativeBuild.*')
-    }.configureEach { task ->
-        def matched = abiToTask.find { abi, _ -> task.name.contains(abi) }
-        task.dependsOn tasks.named(matched ? matched.value : fallbackTask)
-    }
-    tasks.matching { it.name.matches('merge.*JniLibFolders') }.configureEach { mergeTask ->
-        abiToTask.each { _, nativeTaskName ->
-            mergeTask.mustRunAfter(tasks.named(nativeTaskName))
-        }
-    }
-}
+// Native libraries (libvpx, dav1d, ffmpeg, BoringSSL, tde2e) are pre-built by the
+// Dockerfile CMD before gradle is invoked. The buildNativeLibs* tasks above remain
+// available for manual local builds but are NOT wired into the CMake/assemble pipeline.

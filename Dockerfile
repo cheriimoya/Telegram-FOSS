@@ -38,12 +38,14 @@ CMD mkdir -p /home/source/TMessagesProj/build/outputs/apk && \
     cp -R /home/source/. /home/gradle && \
     cd /home/gradle && \
     cd TMessagesProj/jni && \
-    bash build_dav1d.sh && \
-    bash build_libvpx_clang.sh && \
+    bash build_dav1d.sh arm64-v8a && \
+    bash build_libvpx_clang.sh arm64 && \
     bash patch_boringssl.sh && \
-    bash build_boringssl.sh && \
-    bash build_ffmpeg_clang.sh && \
-    bash patch_ffmpeg.sh && \
+    bash build_boringssl.sh arm64 && \
+    bash build_ffmpeg_clang.sh arm64 && \
+    bash patch_ffmpeg.sh arm64-v8a && \
+    bash patch_td.sh && \
+    bash build_tde2e.sh arm64-v8a && \
     cd ../.. && \
     gradle :TMessagesProj_App:bundleBundleAfat_SDK23Release && \
     gradle :TMessagesProj_App:bundleBundleAfatRelease && \
